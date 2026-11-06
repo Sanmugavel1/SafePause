@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SafePause - bank dashboard</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Segoe UI", Roboto, "Noto Sans", Arial, sans-serif; background: #f3f4f6; color: #1f2933; }
+  header { background: #22303c; color: #fff; padding: 10px 18px; display: flex; justify-content: space-between; }
+  header span { color: #c4ccd4; font-size: 13px; }
+  .wrap { padding: 16px 18px; }
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .k { background: #fff; border: 1px solid #e1e5e9; border-radius: 8px; padding: 14px; }
+  .k .n { font-size: 28px; font-weight: 600; } .k .l { font-size: 12.5px; color: #6b7680; margin-top: 2px; }
+  .k.g .n { color: #1f6f43; } .k.r .n { color: #a1251b; } .k.a .n { color: #8a5a00; }
+  h4 { margin: 18px 0 8px; font-size: 12px; color: #6b7680; text-transform: uppercase; letter-spacing: .05em; }
+  table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid #e1e5e9; font-size: 13.5px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #eef0f2; } th { color: #6b7680; font-weight: 600; font-size: 12px; }
+  .sim { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .note { font-size: 12px; color: #6b7680; margin-top: 6px; }
+</style>
+</head>
+<body>
+<header><b>SafePause &middot; Branch dashboard, Demo Co-operative Bank</b><span>Today</span></header>
+<div class="wrap">
+  <div class="kpis" id="kpis"></div>
+  <h4>Payments that SafePause paused today</h4>
+  <table><thead><tr><th>Time</th><th>Customer</th><th>Amount</th><th>Payee</th><th>Tier</th><th>Outcome</th><th>Decided by</th></tr></thead>
+    <tbody id="rows"></tbody></table>
+  <h4>From our simulation (synthetic data, 200 runs)</h4>
+  <div class="sim">
+    <div class="k g"><div class="n">83%</div><div class="l">of scam money stopped (1-hour lag on every payment: 11%)</div></div>
+    <div class="k"><div class="n">0.48%</div><div class="l">of genuine payments delayed, median 14 min (1-hour lag: 4.6%)</div></div>
+    <div class="k"><div class="n">22</div><div class="l">officer reviews per lakh customers per day</div></div>
+  </div>
+  <div class="note">Simulation code and assumptions: sim/ folder. Not real bank data; a shadow pilot comes first.</div>
+</div>
+<script src="common.js"></script>
+<script>
+poll(S => {
+  const p = S.payments, cust = Object.fromEntries(S.customers.map(c => [c.id, c]));
+  const paused = p.filter(x => x.tier !== "low");
+  const stopped = p.filter(x => x.status === "stopped");
+  const saved = stopped.reduce((a, x) => a + x.amount, 0);
+  const lat = S.events.filter(e => e.kind === "timing").map(e => e.ms);
+  const avg = lat.length ? (lat.reduce((a, b) => a + b, 0) / lat.length).toFixed(0) : "-";
+  document.getElementById("kpis").innerHTML = [
+    ["", p.length, "payments checked"], ["", p.length - paused.length, "paid instantly"],
+    ["a", paused.length, "paused or held"], ["r", rs(saved), "kept safe in customers' accounts"]].map(([c, n, l]) =>
+    `<div class="k ${c}"><div class="n">${n}</div><div class="l">${l}</div></div>`).join("") +
+    `<div class="k" style="grid-column: span 4"><div class="l">Average decision time: <b>${avg} ms</b> &nbsp;&middot;&nbsp; Accounts added to the risk list today: <b>${S.risk_list.length - 1}</b></div></div>`;
+  document.getElementById("rows").innerHTML = paused.map(x => `<tr><td>${clock(x.ts)}</td><td>${esc(cust[x.customer_id].name)}</td>
+    <td>${rs(x.amount)}</td><td>${esc(x.payee_name)}</td><td>${x.tier}</td>
+    <td>${x.status === "stopped" ? "Stopped, money returned" : x.status === "paid" ? "Released" : "Waiting"}</td><td>${x.resolved_by || "-"}</td></tr>`).join("")
+    || `<tr><td colspan="7" style="color:#6b7680">Nothing paused yet</td></tr>`;
+});
+</script>
+</body>
+</html>

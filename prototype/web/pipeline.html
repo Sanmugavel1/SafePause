@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SafePause - live pipeline</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #11161c; color: #d8dee4; font-family: "Segoe UI", Roboto, "Noto Sans", Arial, sans-serif; font-size: 13px; }
+  .flow { display: flex; gap: 6px; padding: 10px 12px; border-bottom: 1px solid #263039; align-items: center; flex-wrap: wrap; }
+  .st { padding: 6px 10px; border: 1px solid #33404b; border-radius: 6px; color: #8796a3; transition: all .3s; }
+  .st.on { border-color: #d9ff43; color: #11161c; background: #d9ff43; font-weight: 600; }
+  .st.red { border-color: #ff6b5e; background: #ff6b5e; color: #fff; }
+  .arr { color: #4a5763; }
+  .log { padding: 6px 12px; font-family: "JetBrains Mono", "DejaVu Sans Mono", Consolas, monospace; font-size: 12.5px; }
+  .ln { padding: 3px 0; border-bottom: 1px solid #1b232b; display: grid; grid-template-columns: 74px 92px 92px 1fr 70px; gap: 8px; }
+  .k { color: #9fb3c8; } .pid { color: #6f8396; } .ms { color: #d9ff43; text-align: right; }
+  .k-stopped, .k-report { color: #ff8a80; } .k-paid, .k-released { color: #8fd694; } .k-hold, .k-alert, .k-case { color: #ffd479; }
+  .k-score, .k-decision { color: #d9ff43; }
+</style>
+</head>
+<body>
+<div class="flow" id="flow"></div>
+<div class="log" id="log"></div>
+<script src="common.js"></script>
+<script>
+const STAGES = [["received", "Payment request"], ["signals", "Signals"], ["score", "Risk score"], ["decision", "Decision"],
+  ["hold", "Silent pause / hold"], ["alert", "Family alert"], ["case", "Officer case"], ["end", "Outcome"]];
+function render(S) {
+  const ev = S.events;
+  const latest = ev.find(e => e.payment_id);
+  const pe = latest ? ev.filter(e => e.payment_id === latest.payment_id).map(e => e.kind) : [];
+  const ended = pe.find(k => ["paid", "released", "stopped"].includes(k));
+  document.getElementById("flow").innerHTML = STAGES.map(([k, l], i) => {
+    const on = k === "end" ? !!ended : pe.includes(k);
+    const cls = on ? (k === "end" && ended === "stopped" ? "st red" : "st on") : "st";
+    const lab = k === "end" && ended ? (ended === "stopped" ? "Stopped, money returned" : "Paid") : l;
+    return (i ? '<span class="arr">&rarr;</span>' : "") + `<span class="${cls}">${lab}</span>`;
+  }).join("");
+  document.getElementById("log").innerHTML = ev.slice(0, 60).map(e =>
+    `<div class="ln"><span class="pid">${clock(e.ts)}</span><span class="pid">${e.payment_id || "system"}</span>` +
+    `<span class="k k-${e.kind}">${e.kind}</span><span>${esc(e.msg)}</span><span class="ms">${e.ms != null ? e.ms + " ms" : ""}</span></div>`).join("");
+}
+poll(render, 700);
+</script>
+</body>
+</html>

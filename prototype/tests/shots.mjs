@@ -1,0 +1,30 @@
+// Clean phone / console screenshots for the deck (transparent corners).
+import { chromium } from "playwright";
+const OUT = "../deck/shots";
+const b = await chromium.launch();
+const ctx = await b.newContext({ viewport: { width: 420, height: 800 }, deviceScaleFactor: 2.5 });
+await fetch("http://localhost:8600/api/reset", { method: "POST", body: "{}" });
+const app = await ctx.newPage(); await app.goto("http://localhost:8600/app.html?c=1");
+const con = await ctx.newPage(); await con.goto("http://localhost:8600/contact.html");
+for (const p of [app, con]) await p.addStyleTag({ content: "body{background:transparent!important} .controls{display:none!important}" });
+await app.waitForTimeout(1200);
+await app.locator(".phone").screenshot({ path: `${OUT}/ph_home.png`, omitBackground: true });
+await app.evaluate(() => fill("scam1")); await app.locator("text=Continue").click();
+await app.waitForTimeout(6000);
+for (const k of ["1", "9", "4", "7"]) await app.locator(`#keys button[data-k='${k}']`).click();
+await app.waitForTimeout(2000);
+await app.locator(".phone").screenshot({ path: `${OUT}/ph_processing.png`, omitBackground: true });
+await con.waitForTimeout(1500);
+await con.locator(".phone").screenshot({ path: `${OUT}/ph_son_alert.png`, omitBackground: true });
+await con.locator("text=No. Stop it").click(); await con.waitForTimeout(1500);
+const st = await (await fetch("http://localhost:8600/api/state")).json();
+await fetch("http://localhost:8600/api/officer", { method: "POST", headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ payment_id: st.payments[0].id, action: "stop", note: "Customer said a 'CBI officer' is on a video call. Stated purpose does not match payee." }) });
+await app.waitForTimeout(2000); await con.waitForTimeout(1500);
+await app.locator(".phone").screenshot({ path: `${OUT}/ph_stopped.png`, omitBackground: true });
+await con.locator(".phone").screenshot({ path: `${OUT}/ph_son_done.png`, omitBackground: true });
+const off = await b.newPage({ viewport: { width: 1360, height: 820 }, deviceScaleFactor: 1.6 });
+await off.goto("http://localhost:8600/officer.html"); await off.waitForTimeout(1500);
+await off.locator(".item").first().click(); await off.waitForTimeout(1000);
+await off.screenshot({ path: `${OUT}/officer_hi.png` });
+await b.close(); console.log("ok");

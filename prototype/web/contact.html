@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Trusted contact - phone</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Segoe UI", Roboto, "Noto Sans", Arial, sans-serif; background: #e9ecef;
+         display: flex; justify-content: center; padding: 14px 0; color: #1f2b33; }
+  .phone { width: 360px; height: 740px; background: #f4f1ec; border-radius: 34px; border: 10px solid #1b1f23;
+           overflow: hidden; display: flex; flex-direction: column; }
+  .status { height: 26px; background: #2b2f33; color: #ddd; font-size: 12px; display: flex; justify-content: space-between;
+            align-items: center; padding: 0 16px; }
+  .top { background: #fff; padding: 12px 14px; display: flex; gap: 10px; align-items: center; border-bottom: 1px solid #e3ded6; }
+  .av { width: 36px; height: 36px; border-radius: 50%; background: #0f4c45; color: #f2c14e; display: grid; place-items: center;
+        font-weight: 700; font-size: 12px; }
+  .top .n { font-weight: 600; font-size: 14.5px; } .top .s { font-size: 11.5px; color: #6b7680; }
+  .msgs { flex: 1; overflow-y: auto; padding: 14px 12px; }
+  .empty { text-align: center; color: #8d8a84; font-size: 13px; margin-top: 200px; }
+  .m { background: #fff; border-radius: 4px 14px 14px 14px; padding: 11px 13px; margin-bottom: 12px; font-size: 14px;
+       line-height: 1.45; max-width: 300px; box-shadow: 0 1px 1px rgba(0,0,0,.06); }
+  .m .ts { font-size: 11px; color: #8d959b; margin-top: 6px; text-align: right; }
+  .acts { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+  .acts button { padding: 10px; border-radius: 9px; border: 1px solid #0f4c45; background: #fff; color: #0f4c45; font-size: 14px;
+                 font-weight: 600; cursor: pointer; }
+  .acts button.no { background: #b3261e; border-color: #b3261e; color: #fff; }
+  .me { background: #dcf3e6; margin-left: auto; border-radius: 14px 4px 14px 14px; }
+  body.stage { padding: 6px 0; } body.stage .phone { height: 640px; }
+  .who { font-size: 12px; color: #6b7680; text-align: center; margin: 6px 0 2px; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="status"><span id="clk">--:--</span><span>Arun's phone</span><span>5G</span></div>
+  <div class="top"><div class="av">DCB</div><div><div class="n">Demo Co-operative Bank</div>
+    <div class="s">Verified sender &middot; Family safety alerts</div></div></div>
+  <div class="msgs" id="msgs"><div class="empty">No messages</div></div>
+</div>
+<script src="common.js"></script>
+<script>
+const replied = {};
+if (new URLSearchParams(location.search).get("stage")) document.body.classList.add("stage");
+function render(S) {
+  const el = document.getElementById("msgs");
+  const al = S.alerts.slice().reverse();
+  if (!al.length) { el.innerHTML = '<div class="empty">No messages</div>'; return; }
+  const cust = Object.fromEntries(S.customers.map(c => [c.id, c]));
+  el.innerHTML = al.map(a => {
+    const c = cust[a.customer_id];
+    const rel = "your mother";
+    let html = `<div class="m">Arun, ${rel} <b>${esc(c.name)}</b> is sending <b>${rs(a.amount)}</b> to a new account
+      (${esc(a.payee_name)}, A/c ${mask(a.account)}).<br><br>We have paused this payment for her safety. She does not see this message.
+      <br><br>Do you know about this payment?<div class="ts">${clock(a.ts)}</div>`;
+    if (a.status === "sent") html += `<div class="acts">
+        <button onclick="reply(${a.id},'expected')">Yes, I know about it</button>
+        <button class="no" onclick="reply(${a.id},'not_expected')">No. Stop it</button>
+        <button onclick="reply(${a.id},'call_me')">Call me first</button></div>`;
+    html += `</div>`;
+    const ans = { expected: "Yes, I know about it", not_expected: "No. Stop it", call_me: "Call me first" }[a.status];
+    if (ans) html += `<div class="m me">${ans}<div class="ts">${clock(a.reply_ts)}</div></div>`;
+    if (a.status === "not_expected" || a.pay_status === "stopped")
+      html += `<div class="m">Thank you. A bank officer is reviewing it now${a.pay_status === "stopped" ? ". <b>The payment has been stopped and the money is back in her account.</b> Please call her and stay with her. Do not let anyone on the phone pressure her." : " and will call her."}<div class="ts">${clock(S.now)}</div></div>`;
+    if (a.status === "expected" && a.pay_status === "paid")
+      html += `<div class="m">Thank you. The payment has been completed.<div class="ts">${clock(S.now)}</div></div>`;
+    return html;
+  }).join("");
+  el.scrollTop = el.scrollHeight;
+}
+async function reply(id, ans) { await api("/api/contact", { alert_id: id, answer: ans }); }
+setInterval(() => document.getElementById("clk").textContent = new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }), 1000);
+poll(render);
+</script>
+</body>
+</html>

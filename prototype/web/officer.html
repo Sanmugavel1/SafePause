@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SafePause - officer console</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Segoe UI", Roboto, "Noto Sans", Arial, sans-serif; background: #f3f4f6; color: #1f2933; font-size: 14px; }
+  header { background: #22303c; color: #fff; padding: 10px 18px; display: flex; justify-content: space-between; align-items: center; }
+  header b { font-size: 15px; } header span { font-size: 12.5px; color: #c4ccd4; }
+  .wrap { display: grid; grid-template-columns: 300px 1fr; height: calc(100vh - 42px); }
+  .queue { border-right: 1px solid #dde1e5; overflow-y: auto; background: #fff; }
+  .queue h5 { margin: 0; padding: 10px 14px; font-size: 11.5px; letter-spacing: .05em; color: #6b7680; text-transform: uppercase;
+              border-bottom: 1px solid #eceef1; }
+  .item { padding: 11px 14px; border-bottom: 1px solid #eceef1; cursor: pointer; }
+  .item.sel { background: #eef5ff; border-left: 3px solid #2563eb; padding-left: 11px; }
+  .item .r1 { display: flex; justify-content: space-between; font-weight: 600; }
+  .item .r2 { font-size: 12px; color: #6b7680; margin-top: 3px; display: flex; justify-content: space-between; }
+  .tag { font-size: 11px; font-weight: 600; padding: 1px 7px; border-radius: 4px; }
+  .t-high { background: #fde2e1; color: #a1251b; } .t-medium { background: #fff1d1; color: #8a5a00; }
+  .t-low { background: #e3f4e6; color: #22662f; } .t-done { background: #eceef1; color: #4b5560; }
+  .detail { overflow-y: auto; padding: 16px 20px; }
+  .empty { color: #8a949d; margin-top: 120px; text-align: center; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .box { background: #fff; border: 1px solid #e1e5e9; border-radius: 8px; padding: 12px 14px; }
+  .box h6 { margin: 0 0 8px; font-size: 11.5px; color: #6b7680; text-transform: uppercase; letter-spacing: .05em; }
+  .kv { display: grid; grid-template-columns: 130px 1fr; row-gap: 5px; font-size: 13.5px; }
+  .kv span:nth-child(odd) { color: #6b7680; }
+  .meter { height: 10px; background: linear-gradient(90deg, #d7eadb 0 60%, #fbe8b8 60% 85%, #f6c9c5 85%); border-radius: 5px; position: relative; margin: 10px 0 4px; }
+  .meter i { position: absolute; top: -4px; width: 4px; height: 18px; background: #1f2933; border-radius: 2px; }
+  ol { margin: 6px 0 0; padding-left: 18px; } ol li { margin: 4px 0; }
+  .acts { display: flex; gap: 10px; margin-top: 14px; }
+  .acts button { padding: 11px 18px; border-radius: 7px; border: 1px solid #c3cad1; background: #fff; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .acts .stop { background: #b3261e; color: #fff; border-color: #b3261e; }
+  .acts .rel { background: #1f6f43; color: #fff; border-color: #1f6f43; }
+  textarea { width: 100%; height: 54px; margin-top: 10px; border: 1px solid #cfd6db; border-radius: 6px; padding: 8px; font: inherit; }
+  .script li { color: #33414c; }
+  .tl { font-size: 12.5px; } .tl div { padding: 3px 0; border-bottom: 1px dashed #eceef1; } .tl b { color: #6b7680; font-weight: 500; margin-right: 6px; }
+  .big { font-size: 22px; font-weight: 600; }
+  .fam { padding: 8px 10px; border-radius: 6px; background: #f6f7f9; margin-top: 4px; }
+</style>
+</head>
+<body>
+<header><b>SafePause &middot; Fraud review desk</b><span id="hdr">-</span></header>
+<div class="wrap">
+  <div class="queue" id="queue"></div>
+  <div class="detail" id="detail"><div class="empty">Select a payment from the queue</div></div>
+</div>
+<script src="common.js"></script>
+<script>
+let SEL = null, S = null, lastDetailKey = "", LAST_NEW = null;
+function tierTag(p) {
+  if (p.status === "stopped") return '<span class="tag t-done">Stopped</span>';
+  if (p.status === "paid" && p.tier !== "low") return '<span class="tag t-done">Released</span>';
+  return `<span class="tag t-${p.tier}">${p.tier === "high" ? "Hold" : p.tier === "medium" ? "Paused" : "Paid"}</span>`;
+}
+function render(st) {
+  S = st;
+  const open = S.payments.filter(p => p.status === "held" || p.status === "paused").sort((a, b) => b.score - a.score);
+  const done = S.payments.filter(p => p.tier !== "low" && !(p.status === "held" || p.status === "paused"));
+  const low = S.payments.filter(p => p.tier === "low");
+  document.getElementById("hdr").textContent = `${open.length} open · ${done.length} decided · ${low.length} paid without delay · officer: R. Meena`;
+  const cust = Object.fromEntries(S.customers.map(c => [c.id, c]));
+  const row = p => `<div class="item ${p.id === SEL ? "sel" : ""}" onclick="pick('${p.id}')">
+      <div class="r1"><span>${rs(p.amount)}</span>${tierTag(p)}</div>
+      <div class="r2"><span>${esc(cust[p.customer_id].name)}, ${cust[p.customer_id].age}</span>
+      <span>${p.status === "held" || p.status === "paused" ? p.demo_minutes_left + " min left" : clock(p.ts)}</span></div></div>`;
+  document.getElementById("queue").innerHTML = `<h5>Open (${open.length})</h5>` + open.map(row).join("") +
+    `<h5>Decided</h5>` + done.map(row).join("") + `<h5>Paid instantly (low risk)</h5>` + low.map(row).join("");
+  const newestOpen = open.slice().sort((a, b) => b.ts - a.ts)[0];
+  if (newestOpen && newestOpen.id !== LAST_NEW) { LAST_NEW = newestOpen.id; SEL = newestOpen.id; lastDetailKey = ""; }
+  if (!SEL && open.length) SEL = open[0].id;
+  detail();
+}
+function pick(id) { SEL = id; lastDetailKey = ""; render(S); }
+function detail() {
+  const p = S.payments.find(x => x.id === SEL); if (!p) return;
+  const c = S.customers.find(x => x.id === p.customer_id);
+  const al = S.alerts.find(a => a.payment_id === p.id);
+  const tc = S.contacts.find(t => t.customer_id === c.id);
+  const ev = S.events.filter(e => e.payment_id === p.id).slice().reverse();
+  const key = [p.id, p.status, p.demo_minutes_left, al && al.status, ev.length].join("|");
+  if (key === lastDetailKey) return; lastDetailKey = key;
+  const fd = S.fd.find(f => f.customer_id === c.id && f.amount > 0);
+  const flagged = S.risk_list.find(r => r.account === p.account);
+  const intel = (S.intel || []).find(r => r.account === p.account);
+  const fam = !al ? (tc ? "No alert sent (low risk)" : "No trusted contact enrolled")
+    : al.status === "sent" ? `Alert sent to ${esc(tc.name)} (${tc.relation}) at ${clock(al.ts)}. Waiting for reply.`
+    : al.status === "expected" ? `<b>${esc(tc.name)} says: "Yes, I know about it"</b>`
+    : al.status === "not_expected" ? `<b style="color:#a1251b">${esc(tc.name)} says: "No. Stop it"</b> (${clock(al.reply_ts)})`
+    : `${esc(tc.name)} asked for a call`;
+  const pos = Math.min(100, Math.max(0, p.score < S.t_med ? p.score / S.t_med * 60 : p.score < S.t_high ? 60 + (p.score - S.t_med) / (S.t_high - S.t_med) * 25 : 85 + (p.score - S.t_high) / (1 - S.t_high) * 15));
+  const isOpen = p.status === "held" || p.status === "paused";
+  const keepNote = (document.getElementById("note") || {}).value || "";
+  document.getElementById("detail").innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:baseline">
+      <div><div class="big">${rs(p.amount)} to ${esc(p.payee_name)}</div>
+      <div style="color:#6b7680;margin-top:2px">${p.id} &middot; A/c ${esc(p.account)} &middot; IFSC ${esc(p.ifsc)} &middot; ${clock(p.ts)}</div></div>
+      <div>${tierTag(p)} ${isOpen ? `<span style="color:#6b7680">auto-release in ${p.demo_minutes_left} min</span>` : ""}</div></div>
+    <div class="cols" style="margin-top:14px">
+      <div class="box"><h6>Why it was paused</h6>
+        <div class="meter"><i style="left:calc(${pos}% - 2px)"></i></div>
+        <div style="display:flex;justify-content:space-between;font-size:11.5px;color:#6b7680"><span>Pay now</span><span>Silent pause</span><span>Officer hold</span></div>
+        <ol>${p.reasons.map(r => `<li>${esc(r.text)}</li>`).join("")}${p.rule ? `<li><b>Rule:</b> ${esc(p.rule)}</li>` : ""}</ol></div>
+      <div class="box"><h6>Customer</h6><div class="kv">
+        <span>Name</span><span>${esc(c.name)}, ${c.age}</span><span>City / language</span><span>${c.city} / ${c.language}</span>
+        <span>Usual payment</span><span>${rs(c.typical_amount)}</span><span>Recent events</span><span>${fd ? "Fixed deposit of " + rs(fd.amount) + " closed recently" : "None"}</span>
+        <span>On a call</span><span>${p.signals.on_call ? (p.signals.call_unknown ? "Yes, unknown number" : "Yes") : "No"}</span>
+        <span>Details pasted</span><span>${p.signals.pasted ? "Yes" : "No"}</span></div></div>
+      <div class="box"><h6>Receiving account</h6><div class="kv">
+        <span>First payment</span><span>${p.signals.new_payee ? "Yes, never paid before" : "No, known payee"}</span>
+        <span>Risk list</span><span>${flagged ? "<b style='color:#a1251b'>Listed: " + esc(flagged.reason) + "</b>" : "Not listed"}</span>
+        <span>New accounts, 72 h</span><span>${p.signals.new_payee_pays_72h}</span>
+        ${intel ? `<span>Account age</span><span>${intel.opened_days > 365 ? Math.round(intel.opened_days / 365) + " years" : "<b style='color:#a1251b'>" + intel.opened_days + " days</b>"}</span>
+        <span>Credits, last 48 h</span><span>${intel.credits_48h > 20 ? "<b style='color:#a1251b'>" + intel.credits_48h + " from " + intel.states + " states</b>" : intel.credits_48h}</span>
+        <span>Pattern</span><span>${esc(intel.note)}</span>` : ""}</div>
+        ${intel ? `<div style="font-size:11px;color:#8a949d;margin-top:6px">Receiving-account check: demo data. In practice from the receiving bank or a shared mule-account feed.</div>` : ""}</div>
+      <div class="box"><h6>Family member</h6><div class="fam">${fam}</div></div>
+    </div>
+    ${isOpen ? `<div class="box" style="margin-top:14px"><h6>Calling the customer: victims are often coached to lie</h6>
+      <ol class="script"><li>Ask open questions: "Who gave you this account number?" "What is the payment for?"</li>
+      <li>Check if the stated reason matches the payee name.</li>
+      <li>Ask: "Is anyone else on another phone or video call with you right now?"</li>
+      <li>Remind: no police, CBI, RBI or court ever asks you to move money to a "safe account".</li></ol>
+      <textarea id="note" placeholder="Note for the record"></textarea>
+      <div class="acts"><button onclick="callCust()">Call customer</button><button class="stop" onclick="act('stop')">Stop payment and return money</button>
+      <button class="rel" onclick="act('release')">Release payment</button></div></div>` : ""}
+    <div class="box tl" style="margin-top:14px"><h6>Audit trail</h6>${ev.map(e => `<div><b>${clock(e.ts)}</b>${esc(e.msg)}${e.ms != null ? ` <span style="color:#8a949d">(${e.ms} ms)</span>` : ""}</div>`).join("")}</div>`;
+  if (document.getElementById("note")) document.getElementById("note").value = keepNote;
+}
+async function callCust() { await api("/api/call", { payment_id: SEL }); lastDetailKey = ""; }
+async function act(a) {
+  const note = (document.getElementById("note") || {}).value || "";
+  await api("/api/officer", { payment_id: SEL, action: a, note }); lastDetailKey = "";
+}
+poll(render);
+</script>
+</body>
+</html>

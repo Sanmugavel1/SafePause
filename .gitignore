@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+prototype/safepause.db
+sim/data/
+node_modules/

@@ -1,0 +1,116 @@
+[
+ {
+  "case": "Hyderabad, Oct 2026",
+  "source": "The420.in",
+  "note": "6 transfers, 23-27 Oct, > Rs 1.5 cr, 2 accounts; equal split assumed",
+  "payments": [
+   {
+    "n": 1,
+    "amount": 2500000,
+    "new": 1,
+    "score": 0.9512,
+    "tier": "pay"
+   },
+   {
+    "n": 2,
+    "amount": 2500000,
+    "new": 1,
+    "score": 0.9899,
+    "tier": "PAUSE"
+   },
+   {
+    "n": 3,
+    "amount": 2500000,
+    "new": 0,
+    "score": 0.9918,
+    "tier": "PAUSE"
+   },
+   {
+    "n": 4,
+    "amount": 2500000,
+    "new": 0,
+    "score": 0.9922,
+    "tier": "PAUSE"
+   },
+   {
+    "n": 5,
+    "amount": 2500000,
+    "new": 0,
+    "score": 0.9924,
+    "tier": "PAUSE"
+   },
+   {
+    "n": 6,
+    "amount": 2500000,
+    "new": 0,
+    "score": 0.9925,
+    "tier": "PAUSE"
+   }
+  ],
+  "first_paused": 2,
+  "amount_behind_pause": 12500000,
+  "total": 15000000
+ },
+ {
+  "case": "Jodhpur, Feb 2026",
+  "source": "ETV Bharat, 24 Feb 2026",
+  "note": "Rs 1.85 cr RTGS, then Rs 22 lakh NEFT attempt after FD closed",
+  "payments": [
+   {
+    "n": 1,
+    "amount": 18500000,
+    "new": 1,
+    "score": 0.9869,
+    "tier": "PAUSE"
+   },
+   {
+    "n": 2,
+    "amount": 2200000,
+    "new": 1,
+    "score": 0.9873,
+    "tier": "PAUSE"
+   }
+  ],
+  "first_paused": 1,
+  "amount_behind_pause": 20700000,
+  "total": 20700000
+ },
+ {
+  "case": "Navi Mumbai, Nov 2024",
+  "source": "Free Press Journal, 29 Nov 2024",
+  "note": "Rs 21.94 lakh to various accounts (3 equal parts assumed), then Rs 12 lakh stopped by a manager",
+  "payments": [
+   {
+    "n": 1,
+    "amount": 731000,
+    "new": 1,
+    "score": 0.8344,
+    "tier": "pay"
+   },
+   {
+    "n": 2,
+    "amount": 731000,
+    "new": 1,
+    "score": 0.957,
+    "tier": "pay"
+   },
+   {
+    "n": 3,
+    "amount": 732000,
+    "new": 1,
+    "score": 0.9848,
+    "tier": "PAUSE"
+   },
+   {
+    "n": 4,
+    "amount": 1200000,
+    "new": 1,
+    "score": 0.9961,
+    "tier": "HOLD"
+   }
+  ],
+  "first_paused": 3,
+  "amount_behind_pause": 1932000,
+  "total": 3394000
+ }
+]

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Customer app - Demo Co-operative Bank</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Segoe UI", Roboto, "Noto Sans", "Noto Sans Tamil", Arial, sans-serif; background: #e9ecef; color: #1d2a33;
+         display: flex; flex-direction: column; align-items: center; padding: 14px 0; }
+  .phone { width: 360px; height: 740px; background: #fff; border-radius: 34px; border: 10px solid #1b1f23;
+           overflow: hidden; position: relative; display: flex; flex-direction: column; }
+  .status { height: 26px; background: #0f4c45; color: #e6f2ef; font-size: 12px; display: flex; justify-content: space-between;
+            align-items: center; padding: 0 16px; flex: none; }
+  .status .call { background: #2e7d32; color: #fff; border-radius: 9px; padding: 1px 8px; display: none; }
+  .status .call.on { display: inline-block; }
+  .bar { background: #0f4c45; color: #fff; padding: 12px 16px 14px; display: flex; align-items: center; gap: 10px; flex: none; }
+  .logo { width: 30px; height: 30px; border-radius: 6px; background: #f2c14e; color: #0f4c45; font-weight: 700;
+          display: grid; place-items: center; font-size: 12px; }
+  .bar .t { font-weight: 600; font-size: 15px; } .bar .s { font-size: 11px; opacity: .8; }
+  .back { cursor: pointer; font-size: 20px; margin-right: 4px; }
+  .screen { flex: 1; overflow-y: auto; padding: 16px; display: none; }
+  .screen.on { display: block; }
+  .card { background: #0f4c45; color: #fff; border-radius: 12px; padding: 16px; }
+  .card .l { font-size: 12px; opacity: .8; } .card .v { font-size: 26px; font-weight: 600; margin-top: 4px; }
+  .card .a { font-size: 12px; opacity: .8; margin-top: 8px; }
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 18px 0; }
+  .grid div { text-align: center; font-size: 11.5px; color: #33424c; cursor: pointer; }
+  .grid i { display: grid; place-items: center; width: 46px; height: 46px; margin: 0 auto 6px; border-radius: 12px;
+            background: #e7f1ef; color: #0f4c45; font-style: normal; font-weight: 700; font-size: 15px; }
+  .grid div.hl i { background: #f2c14e; }
+  h4 { margin: 8px 0; font-size: 13px; color: #5d6b74; font-weight: 600; }
+  .tx { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #edf0f2; font-size: 13.5px; }
+  .tx small { display: block; color: #7b8790; font-size: 11.5px; }
+  label { display: block; font-size: 12px; color: #5d6b74; margin: 12px 0 4px; }
+  input { width: 100%; padding: 11px 12px; border: 1px solid #cfd6db; border-radius: 8px; font-size: 15px; }
+  input:focus { outline: 2px solid #0f4c45; border-color: transparent; }
+  .btn { display: block; width: 100%; padding: 13px; margin-top: 18px; border: 0; border-radius: 10px; background: #0f4c45;
+         color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; }
+  .btn.ghost { background: #fff; color: #0f4c45; border: 1px solid #0f4c45; }
+  .sum { border: 1px solid #e3e8eb; border-radius: 10px; padding: 4px 14px; }
+  .sum div { display: flex; justify-content: space-between; padding: 9px 0; font-size: 14px; border-bottom: 1px solid #f0f2f4; }
+  .sum div:last-child { border: 0; } .sum span:first-child { color: #6b7881; }
+  .pin { display: flex; gap: 10px; justify-content: center; margin: 16px 0 6px; }
+  .pin span { width: 14px; height: 14px; border-radius: 50%; border: 2px solid #0f4c45; }
+  .pin span.f { background: #0f4c45; }
+  .keys { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
+  .keys button { padding: 13px 0; font-size: 19px; border: 0; background: #f2f5f6; border-radius: 10px; cursor: pointer; }
+  .keys button.press { background: #cfe3de; }
+  .res { text-align: center; padding-top: 34px; }
+  .res .ic { width: 70px; height: 70px; border-radius: 50%; margin: 0 auto 16px; display: grid; place-items: center;
+             font-size: 32px; color: #fff; }
+  .ok { background: #2e7d32; } .stop { background: #b3261e; }
+  .res h3 { margin: 6px 0; font-size: 19px; } .res p { color: #4b5962; font-size: 14px; line-height: 1.45; }
+  .spin { width: 34px; height: 34px; border: 4px solid #f0e2b8; border-top-color: #8a6d1f; border-radius: 50%;
+          animation: r 1s linear infinite; }
+  @keyframes r { to { transform: rotate(360deg); } }
+  .note { background: #fff7e0; border: 1px solid #f0d58a; border-radius: 10px; padding: 11px; font-size: 12.8px; text-align: left; margin-top: 12px; line-height: 1.45; }
+  .ta { display: block; margin-top: 6px; color: #5a4a12; }
+  .safe { border: 1px solid #dfe6e4; border-radius: 12px; padding: 14px; margin-top: 10px; font-size: 13.5px; line-height: 1.5; }
+  .safe b { color: #0f4c45; }
+  .pill { display: inline-block; background: #e3f4e6; color: #22662f; border-radius: 10px; padding: 1px 9px; font-size: 12px; font-weight: 600; }
+  .controls { width: 360px; margin-top: 12px; background: #fff; border-radius: 10px; padding: 10px 12px; font-size: 12.5px; color: #3c4a53; }
+  .controls b { font-size: 11.5px; letter-spacing: .04em; color: #6b7881; text-transform: uppercase; }
+  .controls label { display: flex; align-items: center; gap: 6px; margin: 6px 0; font-size: 12.5px; color: #3c4a53; }
+  .controls input[type=checkbox] { width: auto; }
+  .controls select, .controls button { font-size: 12.5px; padding: 4px 8px; }
+  .row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+  body.stage { padding: 6px 0; } body.stage .phone { height: 640px; } body.stage .controls { display: none; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="status"><span id="clk">--:--</span><span class="call" id="callchip">On call 02:14</span><span>4G 78%</span></div>
+  <div class="bar"><span class="back" id="back" style="display:none">&larr;</span><div class="logo">DCB</div>
+    <div><div class="t">Demo Co-operative Bank</div><div class="s" id="who">-</div></div></div>
+
+  <div class="screen on" id="s-home">
+    <div class="card"><div class="l">Savings account XXXX 4421</div><div class="v" id="bal">-</div>
+      <div class="a" id="fdline"></div></div>
+    <div class="grid"><div onclick="go('send')"><i>&rarr;</i>Send money</div><div><i>&#8801;</i>Pay bills</div>
+      <div><i>FD</i>Deposits</div><div onclick="go('safety')" id="g-safe"><i>&#9737;</i>Family safety</div></div>
+    <h4>Recent</h4><div id="recent"></div>
+  </div>
+
+  <div class="screen" id="s-safety">
+    <h4>Family safety</h4>
+    <div class="safe" id="safebox"></div>
+    <div class="safe" style="background:#f6f8f8"><b>How it works</b><br>If a payment looks like a scam, the bank may hold it for up
+      to 4 hours while it checks. Your app will show "processing". The person you choose gets a message and can say whether they
+      know about it. A bank officer makes the final decision. Your money stays in your account until then.</div>
+    <div style="font-size:12px;color:#6b7881;margin-top:10px" id="consent"></div>
+  </div>
+
+  <div class="screen" id="s-send">
+    <h4>Send to a bank account</h4>
+    <label>Account holder name</label><input id="f-name" autocomplete="off">
+    <label>Account number</label><input id="f-acc" autocomplete="off" inputmode="numeric">
+    <label>IFSC</label><input id="f-ifsc" autocomplete="off">
+    <label>Amount (&#8377;)</label><input id="f-amt" inputmode="numeric">
+    <label>Remarks (optional)</label><input id="f-rem">
+    <button class="btn" id="b-cont" onclick="toConfirm()">Continue</button>
+  </div>
+
+  <div class="screen" id="s-confirm">
+    <h4>Check and confirm</h4>
+    <div class="sum" id="sum"></div>
+    <div style="text-align:center;font-size:13px;color:#5d6b74;margin-top:16px">Enter your 4-digit PIN</div>
+    <div class="pin" id="pin"><span></span><span></span><span></span><span></span></div>
+    <div class="keys" id="keys"></div>
+  </div>
+
+  <div class="screen" id="s-result"><div class="res" id="res"></div></div>
+</div>
+
+<div class="controls">
+  <b>Demo controls</b> <span style="color:#8a959c">(in the real app these come from Android phone-state APIs)</span>
+  <div class="row"><select id="cust" onchange="setCust(this.value)"><option value="1">Kamala, 74</option><option value="2">Rahul, 29</option></select>
+    <label><input type="checkbox" id="c-call"> On a call, unknown number</label>
+    <label><input type="checkbox" id="c-remote"> Screen-sharing app open</label></div>
+  <div class="row"><button onclick="fill('scam1')">Scam payment 1</button><button onclick="fill('scam2')">Scam payment 2</button>
+    <button onclick="fill('invest1')">Investment scam</button><button onclick="fill('genuine')">Genuine big payment</button>
+    <button onclick="fill('usual')">Usual bill</button><button onclick="reset()">Reset demo</button></div>
+  <div style="margin-top:6px;color:#6b7881">Measured live: paste vs typing, time taken to confirm.</div>
+</div>
+
+<script src="common.js"></script>
+<script>
+let CUST = 1, S = null, pasted = false, confirmStart = 0, pinVal = "", lastPay = null, screen = "home";
+const P = new URLSearchParams(location.search); if (P.get("c")) CUST = +P.get("c");
+if (P.get("stage")) document.body.classList.add("stage");
+document.getElementById("cust").value = CUST;
+["f-acc", "f-name", "f-ifsc"].forEach(id => document.getElementById(id).addEventListener("paste", () => pasted = true));
+document.getElementById("c-call").onchange = e => setCall(e.target.checked);
+document.getElementById("back").onclick = () => go("home");
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+const FILL = {
+  scam1: ["RBI Safe Custody Acct", "91827364550011", "UTIB0001234", "480000", "case verification"],
+  scam2: ["Natl Security Deposit", "77120098345566", "PUNB0012300", "650000", "case verification"],
+  invest1: ["TradeX Wallet Services", "601100224411", "ICIC0000999", "10000", "IPO allotment"],
+  genuine: ["Sri Murugan Motors", "5550001112", "HDFC0000456", "45000", "bike booking"],
+  usual: ["TNPDCL Electricity", "TNEB0042113", "SBIN0000001", "1850", "EB bill"] };
+const IDS = ["f-name", "f-acc", "f-ifsc", "f-amt", "f-rem"];
+
+function setCall(on) { document.getElementById("c-call").checked = on; document.getElementById("callchip").classList.toggle("on", on); }
+function go(s) {
+  screen = s;
+  document.querySelectorAll(".screen").forEach(x => x.classList.toggle("on", x.id === "s-" + s));
+  document.getElementById("back").style.display = s === "home" ? "none" : "inline";
+  if (s === "send") pasted = false;
+  render();
+}
+function setCust(v) { CUST = +v; document.getElementById("cust").value = CUST; lastPay = null; go("home"); }
+function fill(k) {
+  go("send");
+  IDS.forEach((id, i) => document.getElementById(id).value = FILL[k][i]);
+  pasted = k.startsWith("scam") || k.startsWith("invest");
+  if (k.startsWith("scam")) setCall(true);
+  if (["genuine", "usual", "invest1"].includes(k)) setCall(false);
+}
+// Scripted playback for the video: details are pasted for scams (they arrive on WhatsApp), typed otherwise.
+async function autoPay(k, confirmWait = 2500) {
+  go("send"); await sleep(500);
+  const paste = k.startsWith("scam") || k.startsWith("invest");
+  if (k.startsWith("scam")) setCall(true); else setCall(false);
+  for (let i = 0; i < IDS.length; i++) {
+    const el = document.getElementById(IDS[i]); el.focus(); el.value = "";
+    if (paste && i < 3) { await sleep(350); el.value = FILL[k][i]; pasted = true; }
+    else for (const ch of FILL[k][i]) { el.value += ch; await sleep(55); }
+    await sleep(150);
+  }
+  if (!paste) pasted = false;
+  await sleep(500); toConfirm(); await sleep(confirmWait);
+  for (const d of ["1", "9", "4", "7"]) {
+    const b = document.querySelector(`#keys button[data-k='${d}']`); b.classList.add("press"); await sleep(170);
+    b.classList.remove("press"); await press(d); await sleep(120);
+  }
+}
+function toConfirm() {
+  const a = +document.getElementById("f-amt").value;
+  if (!a || !document.getElementById("f-acc").value) return;
+  document.getElementById("sum").innerHTML =
+    `<div><span>To</span><span>${esc(document.getElementById("f-name").value)}</span></div>` +
+    `<div><span>Account</span><span>${mask(document.getElementById("f-acc").value)}</span></div>` +
+    `<div><span>IFSC</span><span>${esc(document.getElementById("f-ifsc").value)}</span></div>` +
+    `<div><span>Amount</span><span><b>${rs(a)}</b></span></div>`;
+  pinVal = ""; drawPin(); confirmStart = performance.now(); go("confirm");
+}
+function drawPin() { document.querySelectorAll("#pin span").forEach((s, i) => s.classList.toggle("f", i < pinVal.length)); }
+document.getElementById("keys").innerHTML = [1,2,3,4,5,6,7,8,9,"",0,"&larr;"].map(k => `<button data-k="${k}">${k}</button>`).join("");
+async function press(k) {
+  if (k === "&larr;" || k === "←") pinVal = pinVal.slice(0, -1); else pinVal += k;
+  drawPin();
+  if (pinVal.length === 4) await pay();
+}
+document.getElementById("keys").onclick = e => { const k = e.target.dataset.k; if (k !== undefined && k !== "") press(k); };
+async function pay() {
+  const body = { customer_id: CUST, name: document.getElementById("f-name").value, account: document.getElementById("f-acc").value,
+    ifsc: document.getElementById("f-ifsc").value, amount: +document.getElementById("f-amt").value,
+    device: { on_call: document.getElementById("c-call").checked, caller_unknown: document.getElementById("c-call").checked,
+              remote_app: document.getElementById("c-remote").checked, pasted, confirm_ms: Math.round(performance.now() - confirmStart) } };
+  const r = await api("/api/pay", body);
+  lastPay = r.id; go("result");
+}
+function result(p) {
+  const el = document.getElementById("res");
+  if (!p) return;
+  const key = p.id + p.status; if (el.dataset.key === key) return; el.dataset.key = key;
+  if (p.status === "paid") el.innerHTML = `<div class="ic ok">&#10003;</div><h3>${rs(p.amount)} sent</h3><p>to ${esc(p.payee_name)}<br>A/c ${mask(p.account)}</p><p style="font-size:12px">Ref ${p.id}</p><button class="btn ghost" onclick="go('home')">Done</button>`;
+  else if (p.status === "paused" || p.status === "held") el.innerHTML = `<div class="ic" style="background:none"><div class="spin"></div></div><h3>Payment processing</h3><p>${rs(p.amount)} to ${esc(p.payee_name)}</p><p>This usually takes a few minutes and can take up to 4 hours. The money stays in your account until it completes.</p><p style="font-size:12px">Ref ${p.id}</p><button class="btn ghost" onclick="go('home')">Back to home</button>`;
+  else if (p.status === "stopped") el.innerHTML = `<div class="ic stop">!</div><h3>We stopped this payment to protect you</h3><p>${rs(p.amount)} is back in your account.</p><div class="note"><b>No police, CBI, RBI or court will ever ask you to move money to a "safe account".</b> If someone on the phone is telling you to pay, hang up. Our officer will call you from our official number. Cyber crime helpline: 1930.${CUST === 1 ? `<span class="ta">காவல்துறை, CBI, RBI அல்லது நீதிமன்றம் யாரும் உங்கள் பணத்தை "பாதுகாப்பான கணக்கிற்கு" மாற்றச் சொல்ல மாட்டார்கள். அழைப்பைத் துண்டியுங்கள்.</span>` : ""}</div><button class="btn ghost" onclick="go('home')">Back to home</button>`;
+  else if (p.status === "declined") el.innerHTML = `<div class="ic stop">!</div><h3>Not enough balance</h3>`;
+}
+function render() {
+  if (!S) return;
+  const c = S.customers.find(x => x.id === CUST);
+  document.getElementById("who").textContent = (CUST === 1 ? "Vanakkam, " : "Hello, ") + c.name.split(" ")[0];
+  document.getElementById("bal").textContent = rs(c.balance);
+  const fd = S.fd.find(f => f.customer_id === CUST && f.amount > 0);
+  document.getElementById("fdline").textContent = fd ? `Fixed deposit of ${rs(fd.amount)} closed yesterday, added to savings` : "Available balance";
+  const tc = S.contacts.find(t => t.customer_id === CUST);
+  document.getElementById("safebox").innerHTML = tc
+    ? `<span class="pill">On</span><br><b>Trusted contact:</b> ${esc(tc.name)} (${tc.relation})<br>${tc.phone}<br><span style="font-size:12px;color:#6b7881">They only see the amount and the payee name when a payment is paused. Never your balance.</span>`
+    : `<span class="pill" style="background:#f1f3f4;color:#5d6b74">Off</span><br>No trusted contact added. Paused payments go to a bank officer only.<button class="btn ghost" style="margin-top:10px">Add a trusted contact</button>`;
+  document.getElementById("consent").textContent = tc ? "Agreed at account opening on 12 Mar 2024. Change or turn off any time (24-hour cooling period)." : "";
+  const mine = S.payments.filter(p => p.customer_id === CUST);
+  const hist = S.history.filter(p => p.customer_id === CUST).slice(0, 5);
+  document.getElementById("recent").innerHTML = mine.concat(hist).slice(0, 6).map(p =>
+    `<div class="tx"><div>${esc(p.payee_name)}<small>${p.status === "paid" ? "Sent" : p.status === "stopped" ? "Stopped, money returned" : "Processing"}</small></div><div>-${rs(p.amount)}</div></div>`).join("");
+  if (screen === "result" && lastPay) result(S.payments.find(p => p.id === lastPay));
+}
+async function reset() { await api("/api/reset", {}); lastPay = null; setCall(false); go("home"); }
+setInterval(() => document.getElementById("clk").textContent = new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }), 1000);
+poll(st => { S = st; render(); });
+</script>
+</body>
+</html>
