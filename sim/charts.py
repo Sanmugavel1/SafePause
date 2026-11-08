@@ -19,23 +19,22 @@ def style(ax):
 # ---- 1. main trade-off chart ----
 fig, ax = plt.subplots(figsize=(8.2, 5.2))
 sw = R["sweep"]
-ax.plot([p["delayed_share"] * 100 for p in sw], [p["value_stopped"] * 100 for p in sw], color=LIME, lw=2.5,
-        label="SafePause at different settings")
-pts = [("P2", "1-hour lag on every payment\nabove Rs 10,000 (RBI option 1)", AMBER),
-       ("P3", "Trusted person for 70+,\nevery payment above Rs 50,000\n(RBI option 2)", GREY),
-       ("P4", "SafePause (chosen setting)", LIME)]
+ax.plot([p["delayed_share"] * 100 for p in sw], [p["value_stopped"] * 100 for p in sw], color=LIME, lw=2)
+pts = [("P2", "1-hour lag on every payment\nabove ₹10,000 (RBI option 1)", AMBER),
+       ("P3", "Trusted person for 70+ above\n₹50,000 (RBI option 2)", GREY),
+       ("P4", "SafePause, setting we chose", LIME)]
 for key, lab, col in pts:
     x = S[key]["delayed_share"]["median"] * 100; y = S[key]["value_stopped"]
     ax.errorbar(x, y["median"] * 100, yerr=[[(y["median"] - y["p05"]) * 100], [(y["p95"] - y["median"]) * 100]],
-                fmt="o", ms=10, color=col, ecolor=col, capsize=5, lw=2, zorder=5)
-off = {"P2": (-2.6, 14), "P3": (0.3, -4), "P4": (0.3, -13)}
+                fmt="o", ms=9, color=col, ecolor=col, capsize=4, lw=1.6, zorder=5)
+off = {"P2": (-2.75, 12), "P3": (0.28, -3), "P4": (0.25, -11)}
 for key, lab, col in pts:
     x = S[key]["delayed_share"]["median"] * 100; y = S[key]["value_stopped"]["median"] * 100
-    dx, dy = off[key]; ax.annotate(lab, (x, y), (x + dx, y + dy), fontsize=12, color=col)
+    dx, dy = off[key]; ax.annotate(lab, (x, y), (x + dx, y + dy), fontsize=12.5, color=col)
+ax.annotate("Other SafePause settings", (2.4, 89), (2.4, 94), fontsize=12, color=LIME)
 ax.set_xlabel("Genuine payments delayed (%)")
 ax.set_ylabel("Scam money stopped (%)")
 ax.set_xlim(-0.1, 5.4); ax.set_ylim(0, 100); style(ax)
-ax.legend(loc="center right", frameon=False, fontsize=12)
 fig.tight_layout(); fig.savefig(os.path.join(OUT, "tradeoff.png"), dpi=220, transparent=True); plt.close(fig)
 
 # ---- 2. by scam type ----

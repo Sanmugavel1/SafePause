@@ -74,7 +74,8 @@ function render(st) {
 }
 function pick(id) { SEL = id; lastDetailKey = ""; render(S); }
 function detail() {
-  const p = S.payments.find(x => x.id === SEL); if (!p) return;
+  const p = S.payments.find(x => x.id === SEL);
+  if (!p) { SEL = null; LAST_NEW = null; lastDetailKey = ""; document.getElementById("detail").innerHTML = '<div class="empty">Select a payment from the queue</div>'; return; }
   const c = S.customers.find(x => x.id === p.customer_id);
   const al = S.alerts.find(a => a.payment_id === p.id);
   const tc = S.contacts.find(t => t.customer_id === c.id);

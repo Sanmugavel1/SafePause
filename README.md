@@ -4,7 +4,9 @@
 
 SafePause is a safety layer for bank apps in India. It spots payments that a customer is being *talked into* making (digital arrest, fake investment, fake KYC calls), quietly pauses only those, asks a family member the customer chose in advance, and lets a bank officer make the final call. Genuine payments go through as they do today.
 
-Built for **K! Hacks 4.0** (Kurukshetra 2027, CEG Tech Forum), FinTech track, by a team from **Madras Institute of Technology, Anna University**.
+Built for **K! Hacks 4.0** (Kurukshetra 2027, CEG Tech Forum), FinTech track, by team **Overclocked Engineers** (Sanmugavel B, Maathesh Thilak K), Madras Institute of Technology, Anna University.
+
+**This is a complete working engine, not a mock-up.** Every payment in the demo runs through the real code in this repository: signals, trained model, decision rules, family alert, officer console and audit log. It is not connected to a real bank yet, so bank and phone data are simulated, and a shadow pilot is the next step.
 
 ![SafePause live demo: customer app, son's phone, officer console and pipeline](docs/images/demo_step_7.png)
 *The working prototype: a ₹4.8 lakh digital-arrest payment has just been stopped and the money is back in the customer's account.*
@@ -12,7 +14,7 @@ Built for **K! Hacks 4.0** (Kurukshetra 2027, CEG Tech Forum), FinTech track, by
 | | |
 |---|---|
 | **Pitch deck** | [docs/SafePause_KHacks4.0_deck.pdf](docs/SafePause_KHacks4.0_deck.pdf) |
-| **Demo video (2 min screen recording)** | [demo-video/SafePause_demo_screen_recording.mp4](demo-video/SafePause_demo_screen_recording.mp4) |
+| **Demo video (2 min silent screen recording)** | [demo-video/SafePause_demo_screen_recording.mp4](demo-video/SafePause_demo_screen_recording.mp4) |
 | **Run it yourself** | `cd prototype && python3 server.py` then open http://localhost:8600 (no installs needed) |
 | **Every number, with its source** | [research/RESEARCH_NOTES.md](research/RESEARCH_NOTES.md) |
 
@@ -34,7 +36,7 @@ In a branch, a person sometimes notices. In a mobile app, nobody does.
 |---|---|
 | Navi Mumbai, Nov 2024 | Manager saw the payee "Royal enterprises" did not fit the "medical" reason. ₹12 lakh saved. |
 | Agra, Sep 2026 | 80-year-old closed FDs to send ₹81 lakh. The bank **called his daughter-in-law**, who knew about the fake-police calls. Stopped. |
-| Hyderabad, Oct 2026 | Six app transfers in five days, ₹1.5 crore, to two accounts. Nobody stepped in. |
+| Hyderabad, Oct 2026 | Six transfers in five days, over ₹1.5 crore, to two accounts. The report mentions no bank stepping in. |
 
 **RBI's proposed fixes treat everyone the same:** a 1-hour lag on every payment above ₹10,000, or a trusted person approving every payment above ₹50,000 by anyone 70+. RBI's own paper asks whether the lag should instead be based on the bank's risk assessment. SafePause is that risk-based version.
 
@@ -86,7 +88,7 @@ Open **http://localhost:8600** at 1920 x 1080 and click **Full video run**. It p
 
 | Story | What you will see |
 |---|---|
-| **Digital arrest** (Kamala, 74) | FD closed yesterday, on a video call with "CBI". She pastes account details and pays ₹4.8 lakh. Paused in ~25 ms, app says "processing", her son is asked, he says No, the officer sees the reasons and an 11-day-old receiving account, calls her, stops it. Money back, warning shown in English and Tamil. Her second attempt goes straight to hold. |
+| **Digital arrest** (Kamala, 74) | FD closed yesterday, on a call with "CBI". She pastes account details and pays ₹4.8 lakh. Paused in ~25 ms, app says "processing", her son is asked, he says No, the officer sees the reasons and an 11-day-old receiving account, calls her, stops it. Money back, warning shown in English and Tamil. Her second attempt goes straight to hold. |
 | **Fake investment** (Rahul, 29) | No phone call. A ₹1,200 "profit" arrives from a stranger, then he pays ₹10,000 to a new account. Stopped at the first payment. |
 | **Genuine payment** | Rahul books a bike: ₹45,000 to a new dealer. Paid instantly, no pop-up. |
 
@@ -156,7 +158,7 @@ Model: logistic scorecard with amount bands, AUC 0.98 on seen scam types and 0.9
 ### Real cases replayed
 Published cases rebuilt from news reports (equal splits assumed where only a total was reported; cautious defaults: details typed, receiving account not on any risk list).
 
-| Case | Lost | SafePause pauses at | Without the call signal |
+| Case | Amount at stake | SafePause pauses at | Without the call signal |
 |---|---|---|---|
 | Hyderabad, Oct 2026 | ₹1.5 crore, 6 transfers | payment 1 | payment 2 |
 | Jodhpur, Feb 2026 | ₹2.07 crore, 2 transfers | payment 1 | payment 1 |
@@ -175,7 +177,7 @@ python3 replay.py
 
 ## 5. Why this is feasible now
 
-- **The signals already exist.** Android lets an app know a call is active and whether the number is saved, without reading the call. Google already warns users in India, the UK and Brazil who open finance apps while screen-sharing on an unknown call (Google Security blog, Dec 2025).
+- **The signals already exist.** Android lets an app know a call is active, and with the customer's permission the phone can check the number against contacts and send only "saved" or "not saved". No call audio is read. WhatsApp calls do not expose the number, so we also replay cases with the call signal removed. Google already warns users in India, the UK and Brazil who open finance apps while screen-sharing on an unknown call (Google Security blog, Dec 2025).
 - **Risk-based holds are already law elsewhere.** Since October 2024, UK banks may delay a payment for up to 4 business days when they have reasonable grounds to suspect fraud.
 - **Indian regulation is moving this way.** RBI's April 2026 paper asks whether the lag should be risk-based; the Supreme Court (4 Aug 2026) ordered RBI to adopt a procedure for temporary debit holds; RBI's revised rules on fraudulent e-banking transactions apply from 1 Jan 2027.
 - **A real bank already did our family step by hand.** In Agra (Sep 2026) the bank stopped an ₹81 lakh transfer by calling the customer's daughter-in-law.
@@ -203,22 +205,22 @@ prototype/        working system (Python + SQLite, no installs)
   tests/          Playwright end-to-end test, screenshot and video recorder
 sim/              synthetic bank, model training, 200-run comparison, charts, real-case replay
 research/         sources for every number and quote
-docs/             pitch deck (PDF), video script, images
-demo-video/       2-minute screen recording of the full demo
+docs/             pitch deck (PDF), images
+demo-video/       2-minute silent screen recording of the full demo
 ```
 
 ## 9. Main sources
 
 1. RBI, Discussion Paper "Exploring safeguards in digital payments to curb frauds", 9 Apr 2026
 2. Supreme Court of India: hearing of 9 Feb 2026 (LiveLaw); order of 4 Aug 2026, *In Re: Victims of Digital Arrest Related to Forged Documents*, 2026 SCC OnLine SC 1532
-3. Agra, Canara Bank case, 8 Sep 2026 (news report, 10 Sep 2026)
+3. The420.in, Bank stops ₹81 lakh digital arrest transfer, Agra, Sep 2026
 4. The420.in, Hyderabad digital-arrest fraud, Oct 2026
 5. Free Press Journal, Navi Mumbai bank manager saves 80-year-old, 29 Nov 2024
 6. ETV Bharat, Mangaluru manager saves couple from losing ₹84 lakh, 5 Dec 2025
 7. UK Payment Services (Amendment) Regulations 2024; FCA guidance FG24/6
 8. Google Security blog, in-call scam protection for financial apps, 3 Dec 2025
 9. Lok Sabha reply: 55.49 crore UPI users, June 2026
-10. RBI, revised directions on fraudulent electronic banking transactions, 24 Jun 2026 (from 1 Jan 2027)
+10. RBI (Commercial Banks - Responsible Business Conduct) Third Amendment Directions, 2026 (from 1 Jan 2027); ELP law note, June 2026
 11. RBI, co-operative banks publication, 29 Dec 2025; RBI FREE-AI framework, 13 Aug 2025
 12. ETV Bharat, Jodhpur digital-arrest case, 24 Feb 2026
 

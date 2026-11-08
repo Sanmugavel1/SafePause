@@ -53,3 +53,5 @@ These are PUBLISHED statements and reports, credited to their source. They are N
 | Singapore Protection from Scams Act 2025 (in force 1 Jul 2025): police restriction orders make banks block a scam victim's transfers, up to 30 days | MHA Singapore | Precedent: protecting a victim from their own payment |
 | UPI users onboarded: 55.49 crore (June 2026, Lok Sabha reply); FY26 UPI value Rs 314 lakh crore | PIB / Lok Sabha | Market sizing |
 | Rs 22,931 cr / 55.49 cr users = about Rs 413 lost per UPI user per year (our arithmetic, rough) | derived | Pricing logic |
+
+**Correction, 8 Nov 2026:** the Agra case was rechecked at The420.in ("Bank Stops ₹81 Lakh Digital Arrest Transfer", updated 9 Sep 2026), which confirms the bank reached the daughter-in-law. The Hyderabad report does not say the transfers were made through an app. RBI's revised directions (from 1 Jan 2027) cover payments made under coercion and put the burden of proving negligence on the bank, per the ELP law note; check the RBI text before final use.

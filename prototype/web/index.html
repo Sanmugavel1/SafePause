@@ -64,53 +64,53 @@ const SCN = {
   async arrest(r) {
     W("f-app").setCust(1); W("f-app").setCall(false); $("h-app").innerHTML = "1 &middot; Kamala's bank app";
     $("h-con").innerHTML = "2 &middot; Son's phone (trusted contact)";
-    cap("Digital arrest &middot; 1/8", "Kamala, 74, Chennai. For two days, \"CBI officers\" have kept her on a video call.",
-        "Yesterday they made her close her &#8377;18 lakh fixed deposit. It is now in her savings account.", ["p-app"]); await sleep(6000);
+    cap("Digital arrest &middot; 1/8", "Kamala, 74, Chennai. For two days, \"CBI officers\" have kept her on a call.",
+        "Yesterday they made her close her &#8377;18 lakh fixed deposit. It is now in her savings account.", ["p-app"]); await sleep(12000);
     if (r !== RUN) return;
     W("f-app").go("safety");
     cap("Digital arrest &middot; 2/8", "When she opened her account, Kamala added her son Arun as a trusted contact.",
-        "He never sees her balance. He is only asked when a payment looks like a scam.", ["p-app"]); await sleep(6000);
+        "He never sees her balance. He is only asked when a payment looks like a scam.", ["p-app"]); await sleep(5500);
     if (r !== RUN) return;
     cap("Digital arrest &middot; 3/8", "Still on the call, she is told to move &#8377;4.8 lakh to an \"RBI safe custody account\".",
         "The account details arrive on WhatsApp. She pastes them and confirms with her PIN.", ["p-app"]);
-    await W("f-app").autoPay("scam1", 4500); await sleep(1200);
+    await W("f-app").autoPay("scam1", 2500); await sleep(800);
     if (r !== RUN) return;
     cap("Digital arrest &middot; 4/8", "SafePause scores the payment in about 25 ms. It is risky, so it is paused.",
-        "Her screen only says <b>processing</b>. The scammer listening on the call hears nothing unusual.", ["p-app", "p-pipe"]); await sleep(7000);
+        "Her screen only says <b>processing</b>. The scammer listening on the call hears nothing unusual.", ["p-app", "p-pipe"]); await sleep(11000);
     if (r !== RUN) return;
     cap("Digital arrest &middot; 5/8", "Arun gets a message: do you know about this payment?",
-        "He does not. He taps <b>No. Stop it</b>.", ["p-con"]); await sleep(4000);
+        "He does not. He taps <b>No. Stop it</b>.", ["p-con"]); await sleep(5500);
     const a = await latestAlert(); if (a) await W("f-con").reply(a.id, "not_expected"); await sleep(3500);
     if (r !== RUN) return;
     cap("Digital arrest &middot; 6/8", "The case moves to a bank officer, with the reasons in plain words.",
-        "Big amount to a new account, on a call with an unknown number, details pasted. The receiving account is 11 days old.", ["p-off"]); await sleep(5000);
+        "Big amount to a new account, on a call with an unknown number, details pasted. The receiving account is 11 days old.", ["p-off"]); await sleep(8000);
     { const q = await latestPay(); await post("/api/call", { payment_id: q.id }); }
     cap("Digital arrest &middot; 6/8", "The officer calls Kamala on her registered number.",
-        "She says it is for \"case verification\". That does not match a payee called \"RBI Safe Custody Acct\".", ["p-off"]); await sleep(5000);
+        "She says it is for \"case verification\". That does not match a payee called \"RBI Safe Custody Acct\".", ["p-off"]); await sleep(9000);
     if (r !== RUN) return;
     const p = await latestPay();
     await post("/api/officer", { payment_id: p.id, action: "stop", note: "Customer says a 'CBI officer' is on a video call. Payee name does not fit her reason." });
     cap("Digital arrest &middot; 7/8", "The officer stops it. &#8377;4.8 lakh is back in Kamala's account.",
-        "The receiving account goes on the bank's risk list, and a report is ready for 1930 / NCRP.", ["p-app", "p-off", "p-pipe"]); await sleep(7000);
+        "The receiving account goes on the bank's risk list, and a report is ready for 1930 / NCRP.", ["p-app", "p-off", "p-pipe"]); await sleep(6500);
     if (r !== RUN) return;
     W("f-app").go("home"); await sleep(800);
     cap("Digital arrest &middot; 8/8", "The scammers try again with a different account.",
         "This time the payment goes straight to an officer hold.", ["p-app", "p-pipe"]);
-    await W("f-app").autoPay("scam2", 3000); await sleep(6000);
+    await W("f-app").autoPay("scam2", 600); await sleep(2500);
   },
   async invest(r) {
     await post("/api/reset"); W("f-app").setCust(2); W("f-app").setCall(false); $("h-app").innerHTML = "1 &middot; Rahul's bank app";
     $("h-con").innerHTML = "2 &middot; Trusted contact (Rahul has none)";
     cap("Fake investment &middot; 1/4", "Rahul, 29, joined a WhatsApp \"stock tips\" group. No phone call this time.",
         "To build trust, the group sends him a &#8377;1,200 \"profit\" from an unknown account.", ["p-app"]);
-    await post("/api/credit", { customer_id: 2, amount: 1200, label: "\"IPO profit\"" }); await sleep(6000);
+    await post("/api/credit", { customer_id: 2, amount: 1200, label: "\"IPO profit\"" }); await sleep(10000);
     if (r !== RUN) return;
     cap("Fake investment &middot; 2/4", "Now they ask for &#8377;10,000 to \"book an IPO allotment\".",
         "He pastes the account details they sent.", ["p-app"]);
-    await W("f-app").autoPay("invest1", 2000); await sleep(1500);
+    await W("f-app").autoPay("invest1", 1200); await sleep(600);
     if (r !== RUN) return;
     cap("Fake investment &middot; 3/4", "Small amount, but the pattern is clear: money from a stranger, then a first payment to a new account.",
-        "Rahul has no trusted contact, so the officer gets it directly.", ["p-off", "p-pipe"]); await sleep(8000);
+        "Rahul has no trusted contact, so the officer gets it directly.", ["p-off", "p-pipe"]); await sleep(9500);
     if (r !== RUN) return;
     const p = await latestPay();
     await post("/api/officer", { payment_id: p.id, action: "stop", note: "Customer confirms WhatsApp 'IPO group'. Told him about the scam." });
@@ -121,10 +121,10 @@ const SCN = {
     await post("/api/reset"); W("f-app").setCust(2); W("f-app").setCall(false); $("h-app").innerHTML = "1 &middot; Rahul's bank app";
     cap("Genuine payments &middot; 1/2", "Rahul books a new bike: &#8377;45,000 to a dealer he has never paid before.",
         "Big, and to a new account. A blanket rule would delay it.", ["p-app"]);
-    await W("f-app").autoPay("genuine", 2000); await sleep(3000);
+    await W("f-app").autoPay("genuine", 800); await sleep(800);
     if (r !== RUN) return;
     cap("Genuine payments &middot; 2/2", "Paid at once. No pause, no pop-up.",
-        "In our simulation, 99.5% of genuine payments never notice SafePause.", ["p-app", "p-pipe"]); await sleep(6000);
+        "In our simulation, 99.5% of genuine payments never notice SafePause.", ["p-app", "p-pipe"]); await sleep(5000);
   },
 };
 async function play(name) {

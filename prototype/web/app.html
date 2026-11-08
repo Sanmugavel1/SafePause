@@ -161,7 +161,7 @@ function fill(k) {
 }
 // Scripted playback for the video: details are pasted for scams (they arrive on WhatsApp), typed otherwise.
 async function autoPay(k, confirmWait = 2500) {
-  go("send"); await sleep(500);
+  go("send"); IDS.forEach(i => { document.getElementById(i).value = ""; }); await sleep(500);
   const paste = k.startsWith("scam") || k.startsWith("invest");
   if (k.startsWith("scam")) setCall(true); else setCall(false);
   for (let i = 0; i < IDS.length; i++) {
