@@ -8,13 +8,18 @@ Built for **K! Hacks 4.0** (Kurukshetra 2027, CEG Tech Forum), FinTech track, by
 
 **This is a complete working engine, not a mock-up.** Every payment in the demo runs through the real code in this repository: signals, trained model, decision rules, family alert, officer console and audit log. It is not connected to a real bank yet, so bank and phone data are simulated, and a shadow pilot is the next step.
 
+[![Watch the SafePause video walkthrough on YouTube](docs/images/video_thumbnail.png)](https://youtu.be/fXHyqWcTbUs)
+
+**[Watch the 3:43 video walkthrough](https://youtu.be/fXHyqWcTbUs)**
+
 ![SafePause live demo: customer app, son's phone, officer console and pipeline](docs/images/demo_step_7.png)
 *The working prototype: a ₹4.8 lakh digital-arrest payment has just been stopped and the money is back in the customer's account.*
 
 | | |
 |---|---|
 | **Pitch deck** | [docs/SafePause_KHacks4.0_deck.pdf](docs/SafePause_KHacks4.0_deck.pdf) |
-| **Demo video (2 min silent screen recording)** | [demo-video/SafePause_demo_screen_recording.mp4](demo-video/SafePause_demo_screen_recording.mp4) |
+| **Video walkthrough (3:43, with voice-over)** | [youtu.be/fXHyqWcTbUs](https://youtu.be/fXHyqWcTbUs) |
+| **Demo only (2 min silent screen recording)** | [demo-video/SafePause_demo_screen_recording.mp4](demo-video/SafePause_demo_screen_recording.mp4) |
 | **Run it yourself** | `cd prototype && python3 server.py` then open http://localhost:8600 (no installs needed) |
 | **Every number, with its source** | [research/RESEARCH_NOTES.md](research/RESEARCH_NOTES.md) |
 
